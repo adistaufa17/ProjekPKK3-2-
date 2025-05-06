@@ -1,0 +1,209 @@
+=====================
+Date: 2025-05-06 01:27:11
+To: admin@sekolah.sch.id
+Subject: Permintaan Booking Ruang Baru
+Message: 
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #3498db; color: white; padding: 15px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .details { margin: 15px 0; padding: 15px; background: #fff; border-left: 5px solid #3498db; }
+            .footer { padding: 10px; text-align: center; font-size: 12px; color: #777; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Permintaan Booking Ruang Baru</h2>
+            </div>
+            <div class='content'>
+                <p>Kepada Admin,</p>
+                <p>Ada permintaan booking ruang baru yang memerlukan persetujuan Anda:</p>
+                <div class='details'>
+                    <p><strong>Ekstrakurikuler:</strong> Administrator</p>
+                    <p><strong>Ruang:</strong> C105</p>
+                    <p><strong>Gedung:</strong> Gedung C</p>
+                    <p><strong>Hari:</strong> Selasa</p>
+                    <p><strong>Waktu Pengajuan:</strong> 06-05-2025 06:27</p>
+                </div>
+                <p>Silakan login ke sistem untuk menyetujui atau menolak permintaan ini.</p>
+            </div>
+            <div class='footer'>
+                <p>Email ini dikirim secara otomatis oleh Sistem Pemesanan Ruang. Mohon tidak membalas email ini.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    
+=====================
+
+=====================
+Date: 2025-05-06 01:27:30
+To: admin@sekolah.sch.id
+Subject: Pembaruan Status Booking Ruang - Ditolak
+Message: 
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #3498db; color: white; padding: 15px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .details { margin: 15px 0; padding: 15px; background: #fff; border-left: 5px solid #dc3545; }
+            .status { display: inline-block; padding: 5px 10px; background-color: #dc3545; color: white; border-radius: 3px; }
+            .footer { padding: 10px; text-align: center; font-size: 12px; color: #777; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Pembaruan Status Booking Ruang</h2>
+            </div>
+            <div class='content'>
+                <p>Kepada Administrator,</p>
+                <p>Status pemesanan ruang Anda telah diperbarui menjadi: <span class='status'>Ditolak</span></p>
+                <div class='details'>
+                    <p><strong>Ruang:</strong> C105</p>
+                    <p><strong>Gedung:</strong> Gedung C</p>
+                    <p><strong>Hari:</strong> Selasa</p>
+                </div>
+                <p>Silakan cek riwayat booking Anda di sistem untuk informasi lebih lanjut.</p>
+            </div>
+            <div class='footer'>
+                <p>Email ini dikirim secara otomatis oleh Sistem Pemesanan Ruang. Mohon tidak membalas email ini.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    
+=====================
+
+=====================
+Date: 2025-05-06 01:28:20
+To: admin@sekolah.sch.id
+Subject: Permintaan Booking Ruang Baru
+Message: 
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #3498db; color: white; padding: 15px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .details { margin: 15px 0; padding: 15px; background: #fff; border-left: 5px solid #3498db; }
+            .footer { padding: 10px; text-align: center; font-size: 12px; color: #777; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Permintaan Booking Ruang Baru</h2>
+            </div>
+            <div class='content'>
+                <p>Kepada Admin,</p>
+                <p>Ada permintaan booking ruang baru yang memerlukan persetujuan Anda:</p>
+                <div class='details'>
+                    <p><strong>Ekstrakurikuler:</strong> Palang Merah Remaja</p>
+                    <p><strong>Ruang:</strong> B103</p>
+                    <p><strong>Gedung:</strong> Gedung B</p>
+                    <p><strong>Hari:</strong> Selasa</p>
+                    <p><strong>Waktu Pengajuan:</strong> 06-05-2025 06:28</p>
+                </div>
+                <p>Silakan login ke sistem untuk menyetujui atau menolak permintaan ini.</p>
+            </div>
+            <div class='footer'>
+                <p>Email ini dikirim secara otomatis oleh Sistem Pemesanan Ruang. Mohon tidak membalas email ini.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    
+=====================
+
+=====================
+Date: 2025-05-06 03:27:37
+To: admin@sekolah.sch.id
+Subject: Laporan Kondisi Ruang Baru
+Message: 
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #3498db; color: white; padding: 15px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .details { margin: 15px 0; padding: 15px; background: #fff; border-left: 5px solid #3498db; }
+            .footer { padding: 10px; text-align: center; font-size: 12px; color: #777; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Laporan Kondisi Ruang Baru</h2>
+            </div>
+            <div class='content'>
+                <p>Kepada Admin,</p>
+                <p>Ada laporan kondisi ruang baru yang telah dikirimkan:</p>
+                <div class='details'>
+                    <p><strong>Ekstrakurikuler:</strong> Palang Merah Remaja</p>
+                    <p><strong>Ruang:</strong> B103</p>
+                    <p><strong>Gedung:</strong> Gedung B</p>
+                    <p><strong>Hari:</strong> Selasa</p>
+                    <p><strong>Waktu Laporan:</strong> 06-05-2025 08:27</p>
+                </div>
+                <p>Silakan login ke sistem untuk melihat detail laporan ini.</p>
+            </div>
+            <div class='footer'>
+                <p>Email ini dikirim secara otomatis oleh Sistem Pemesanan Ruang. Mohon tidak membalas email ini.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    
+=====================
+
+=====================
+Date: 2025-05-06 03:54:43
+To: admin@sekolah.sch.id
+Subject: Permintaan Booking Ruang Baru
+Message: 
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .header { background: #3498db; color: white; padding: 15px; text-align: center; }
+            .content { padding: 20px; background: #f9f9f9; }
+            .details { margin: 15px 0; padding: 15px; background: #fff; border-left: 5px solid #3498db; }
+            .footer { padding: 10px; text-align: center; font-size: 12px; color: #777; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2>Permintaan Booking Ruang Baru</h2>
+            </div>
+            <div class='content'>
+                <p>Kepada Admin,</p>
+                <p>Ada permintaan booking ruang baru yang memerlukan persetujuan Anda:</p>
+                <div class='details'>
+                    <p><strong>Ekstrakurikuler:</strong> Administrator</p>
+                    <p><strong>Ruang:</strong> B102</p>
+                    <p><strong>Gedung:</strong> Gedung B</p>
+                    <p><strong>Hari:</strong> Senin</p>
+                    <p><strong>Waktu Pengajuan:</strong> 06-05-2025 08:54</p>
+                </div>
+                <p>Silakan login ke sistem untuk menyetujui atau menolak permintaan ini.</p>
+            </div>
+            <div class='footer'>
+                <p>Email ini dikirim secara otomatis oleh Sistem Pemesanan Ruang. Mohon tidak membalas email ini.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+    
+=====================
+

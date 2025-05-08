@@ -1,8 +1,14 @@
 <?php
 session_start();
 require_once 'config/database.php';
+require_once 'notifications.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit();
+}
+
+if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
@@ -297,6 +303,22 @@ $reports = $stmt->fetchAll();
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item active"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
+            <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
+                <a href="notifications_page.php">
+                    <i class="fas fa-bell"></i> 
+                    <span class="menu-text">
+                        Notifikasi
+                        <?php 
+                        // Dapatkan jumlah notifikasi yang belum dibaca
+                        $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
+                        // Tampilkan badge jika ada notifikasi yang belum dibaca
+                        if ($unreadCount > 0): 
+                        ?>
+                        <span class="notification-badge"><?= $unreadCount ?></span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            </li>
             <li class="menu-item"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
@@ -388,6 +410,27 @@ $reports = $stmt->fetchAll();
     </div>
 
     <script>
+        // Auto-update notification badge every 30 seconds
+        setInterval(function() {
+            fetch('get_notification_count.php')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (data.count > 0) {
+                    if (badge) {
+                        badge.textContent = data.count;
+                    } else {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge';
+                        newBadge.textContent = data.count;
+                        document.querySelector('.menu-item a[href="notifications_page.php"] .menu-text').appendChild(newBadge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            });
+        }, 30000);
+        
         // Responsive menu toggle for mobile
         document.addEventListener('DOMContentLoaded', function() {
             const mediaQuery = window.matchMedia('(max-width: 360px)');

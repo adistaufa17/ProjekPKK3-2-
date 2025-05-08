@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once 'config/database.php';
-require_once 'send_email.php';
+require_once 'notifications.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -100,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             
             if ($result) {
-                // Send email notification to admin
                 sendRoomReportNotification($db, $db->lastInsertId());
                 
                 $_SESSION['success'] = "Laporan kondisi ruang berhasil dikirim. Terima kasih!";
@@ -228,5 +227,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
     </div>
+
+<script>
+    // Auto-update notification badge every 30 seconds
+    setInterval(function() {
+            fetch('get_notification_count.php')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (data.count > 0) {
+                    if (badge) {
+                        badge.textContent = data.count;
+                    } else {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge';
+                        newBadge.textContent = data.count;
+                        document.querySelector('.menu-item a[href="notifications_page.php"] .menu-text').appendChild(newBadge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            });
+        }, 30000);
+</script>
 </body>
 </html>

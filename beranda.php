@@ -1,5 +1,8 @@
 <?php
 session_start();
+require_once 'config/database.php';
+require_once 'notifications.php'; // Tambahkan ini untuk menggunakan fungsi notifikasi
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -231,6 +234,18 @@ if (!isset($_SESSION['user_id'])) {
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
+            <li class="menu-item">
+                <a href="notifications_page.php">
+                    <i class="fas fa-bell"></i> 
+                    <span class="menu-text">
+                        Notifikasi
+                        <?php if (getUnreadNotificationCount($db, $_SESSION['user_id']) > 0): ?>
+                            <span class="notification-badge"><?= getUnreadNotificationCount($db, $_SESSION['user_id']) ?></span>
+                            <?php endif; ?>
+                    </span>
+                </a>
+            </li>
+
             <li class="menu-item"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
@@ -320,6 +335,28 @@ if (!isset($_SESSION['user_id'])) {
                 }
             });
         });
+
+        // Auto-update notification badge every 30 seconds
+        setInterval(function() {
+            fetch('get_notification_count.php')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.notification-badge');
+                if (data.count > 0) {
+                    if (badge) {
+                        badge.textContent = data.count;
+                    } else {
+                        const newBadge = document.createElement('span');
+                        newBadge.className = 'notification-badge';
+                        newBadge.textContent = data.count;
+                        document.querySelector('.menu-item a[href="notifications_page.php"] .menu-text').appendChild(newBadge);
+                    }
+                } else if (badge) {
+                    badge.remove();
+                }
+            });
+        }, 30000);
+
     </script>
 </body>
 </html>

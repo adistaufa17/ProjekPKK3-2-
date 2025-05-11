@@ -8,6 +8,24 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+
+$resetNotification = '';
+if (isset($_SESSION['reset_status'])) {
+    $alertType = $_SESSION['reset_status'] === 'success' ? 'success' : 'danger';
+    $resetNotification = '
+    <div class="alert alert-'.$alertType.' alert-dismissible fade show" role="alert" style="margin: 20px auto; max-width: 800px;">
+        '.$_SESSION['reset_message'].'
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    ';
+    
+    // Hapus notifikasi setelah ditampilkan
+    unset($_SESSION['reset_status']);
+    unset($_SESSION['reset_message']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -218,6 +236,39 @@ if (!isset($_SESSION['user_id'])) {
                 margin-right: 0;
             }
         }
+
+
+        .alert {
+            position: relative;
+            padding: 1rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 0.25rem;
+        }
+        
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+        
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+        
+        .close {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #000;
+            text-shadow: 0 1px 0 #fff;
+            opacity: .5;
+            background: transparent;
+            border: 0;
+        }
     </style>
 </head>
 <body>
@@ -252,6 +303,7 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <div class="main-container">
+        <?php echo $resetNotification; ?>
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
@@ -302,6 +354,15 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dismiss alert
+            document.querySelectorAll('.alert .close').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    this.parentElement.style.display = 'none';
+                });
+            });
+        });
         // Responsive menu toggle for mobile
         document.addEventListener('DOMContentLoaded', function() {
             const mediaQuery = window.matchMedia('(max-width: 360px)');

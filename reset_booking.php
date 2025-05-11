@@ -10,6 +10,8 @@ function resetBookingData($db) {
         
         // 2. Hapus semua booking (parent table)
         $db->exec("DELETE FROM bookings");
+
+        $db->exec("DELETE FROM notifications");
         
         $db->commit();
         

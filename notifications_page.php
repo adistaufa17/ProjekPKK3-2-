@@ -214,6 +214,10 @@ $notifications = getUserNotifications($db, $_SESSION['user_id'], 50);
             <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
             <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
+            <?php if ($_SESSION['role'] === 'admin'): ?>
+            <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+            <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
+            <?php endif; ?>
             <li class="menu-item active">
                 <a href="notifications_page.php">
                     <i class="fas fa-bell"></i> 
@@ -230,11 +234,8 @@ $notifications = getUserNotifications($db, $_SESSION['user_id'], 50);
                     </span>
                 </a>
             </li>
-            <?php if ($_SESSION['role'] === 'admin'): ?>
-            <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
-            <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
-            <?php endif; ?>
-            <li class="menu-item"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
+            
+            <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
 

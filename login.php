@@ -70,9 +70,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <div class="form-container">
             <h2>Login Sistem Pemesanan Ruang</h2>
+            
+            <?php if (isset($_SESSION['logout_success'])): ?>
+                <div style="color: green; margin-bottom: 15px; text-align: center;">
+                    Anda telah berhasil logout. Silakan login kembali untuk melanjutkan.
+                </div>
+                <?php unset($_SESSION['logout_success']); ?>
+            <?php endif; ?>
+            
             <?php if (!empty($error)): ?>
                 <div style="color: red; margin-bottom: 15px; text-align: center;"><?= $error ?></div>
             <?php endif; ?>
+            
             <form method="post" action="">
                 <input type="text" name="username" placeholder="Username" required>
                 <input type="password" name="password" placeholder="Password" required>

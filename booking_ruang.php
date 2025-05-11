@@ -298,7 +298,7 @@ function getEkskulName($db, $booking) {
                 </a>
             </li>
 
-            <li class="menu-item"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
+            <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
     

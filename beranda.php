@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once 'config/database.php';
-require_once 'notifications.php'; // Tambahkan ini untuk menggunakan fungsi notifikasi
+require_once 'notifications.php';
+require_once 'reset_booking.php'; // Tambahkan ini untuk menggunakan fungsi notifikasi
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -246,7 +247,7 @@ if (!isset($_SESSION['user_id'])) {
                 </a>
             </li>
 
-            <li class="menu-item"><a href="logout.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
+            <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
 

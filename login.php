@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Login - Sistem Pemesanan Ruang</title>
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-<body>
+<body>  
     <div class="container">
         <div class="form-container">
             <h2>Login Sistem Pemesanan Ruang</h2>

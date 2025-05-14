@@ -285,6 +285,7 @@ if (isset($_SESSION['reset_status'])) {
             <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
+            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i> Team Developer</a></li>
             <?php endif; ?>
             <li class="menu-item">
                 <a href="notifications_page.php">

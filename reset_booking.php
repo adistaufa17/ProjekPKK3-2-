@@ -1,6 +1,6 @@
 <?php
 require_once 'config/database.php';
-
+$needsReset = false;
 function resetBookingData($db) {
     try {
         $db->beginTransaction();
@@ -34,7 +34,7 @@ function resetBookingData($db) {
 // Cek kapan terakhir reset
 $lastReset = $db->query("SELECT setting_value FROM system_settings WHERE setting_key = 'last_reset'")->fetchColumn();
 $currentWeek = date('Y-W');
-$needsReset = false;
+
 
 // Logika reset otomatis (Sabtu jam 00:00)
 if (date('w') == 6 && date('H') == 0) {

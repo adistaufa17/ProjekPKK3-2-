@@ -39,13 +39,13 @@ $currentWeek = date('Y-W');
 // Logika reset otomatis (Sabtu jam 00:00)
 if (date('w') == 6 && date('H') == 0) {
     if (!$lastReset || date('Y-W', strtotime($lastReset)) != $currentWeek) {
-        $needsReset = true;
+        $needsReset = false;
     }
 }
 
 // Opsi manual override untuk testing
 if (isset($_GET['forcereset'])) {
-    $needsReset = true;
+    $needsReset = false;
 }
 
 // Eksekusi reset jika diperlukan

@@ -23,14 +23,53 @@ $stmt = $db->query("SELECT * FROM buildings ORDER BY id ASC");
 $buildings = $stmt->fetchAll();
 
 // Function to check if room is booked
-function isRoomBooked($db, $room_id, $hari) {
+function isRoomBooked($db, $room_id, $hari, $current_date) {
     $stmt = $db->prepare("
         SELECT * FROM bookings 
-        WHERE room_id = :room_id AND hari = :hari AND status IN ('pending', 'approved')
+        WHERE room_id = :room_id 
+        AND hari = :hari 
+        AND booking_date = :booking_date
+        AND status IN ('pending', 'approved')
     ");
-    $stmt->execute(['room_id' => $room_id, 'hari' => $hari]);
+    $stmt->execute([
+        'room_id' => $room_id, 
+        'hari' => $hari,
+        'booking_date' => $current_date
+    ]);
     return $stmt->fetch();
 }
+
+// Dapatkan tanggal hari ini
+$current_date = date('Y-m-d');
+
+// Di bagian tampilan ruangan, tambahkan pengecekan waktu
+foreach ($rooms as $room):
+    $booking = isRoomBooked($db, $room['id'], $hari, $current_date);
+    $isBooked = $booking ? true : false;
+
+    // Untuk Workshop, tampilkan waktu booking jika ada
+    if ($room['building_id'] == 5) { // ID 5 adalah Workshop
+        if ($isBooked) {
+            $time_info = " (".date('H:i', strtotime($booking['start_time']))." - ".date('H:i', strtotime($booking['end_time'])).")";
+        } else {
+            $time_info = " (Tersedia)";
+        }
+    } else {
+        $time_info = "";
+    }
+    
+    $roomClass = $isBooked ? "room booked" : "room available";
+    
+    if ($isBooked): ?>
+        <div class="<?= $roomClass ?>" onclick="showRoomDetails(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>', '<?= htmlspecialchars(getEkskulName($db, $booking)) ?>', '<?= $booking['status'] ?>', '<?= $booking['start_time'] ?>', '<?= $booking['end_time'] ?>')" title="<?= htmlspecialchars($room['nama_ruang']) ?> - Sudah dipesan oleh <?= htmlspecialchars(getEkskulName($db, $booking)) ?>">
+            <?= htmlspecialchars($room['nama_ruang']) ?><?= $time_info ?>
+        </div>
+    <?php else: ?>
+        <div class="<?= $roomClass ?>" onclick="<?= ($room['building_id'] == 5) ? "showTimeSelection(".$room['id'].",'".htmlspecialchars($room['nama_ruang'])."')" : "bookRoom(".$room['id'].",'".htmlspecialchars($room['nama_ruang'])."')" ?>" title="<?= htmlspecialchars($room['nama_ruang']) ?> - Tersedia">
+            <?= htmlspecialchars($room['nama_ruang']) ?><?= $time_info ?>
+        </div>
+    <?php endif;
+endforeach;
 
 // Function to get ekstrakurikuler name
 function getEkskulName($db, $booking) {
@@ -268,6 +307,27 @@ function getEkskulName($db, $booking) {
             cursor: pointer;
         }
 
+        .time-selection {
+        margin: 20px 0;
+        }
+
+        .time-input {
+        margin-bottom: 15px;
+        }
+
+        .time-input label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        }
+
+        .time-input input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        }
+
         @media (max-width: 768px) {
             .day-navigation {
                 display: flex;
@@ -341,7 +401,7 @@ function getEkskulName($db, $booking) {
                     <div class="room-row">
                         <?php foreach ($rooms as $room): ?>
                             <?php 
-                            $booking = isRoomBooked($db, $room['id'], $hari);
+                            $booking = isRoomBooked($db, $room['id'], $hari, $current_date);
                             $isBooked = $booking ? true : false;
                             $roomClass = $isBooked ? "room booked" : "room available";
                             ?>
@@ -387,6 +447,28 @@ function getEkskulName($db, $booking) {
             </div>
         </div>
     </div>
+
+    <!-- Time Selection Popup for Workshop -->
+<div class="room-popup" id="timeSelectionPopup" style="display: none;">
+    <div class="room-details">
+        <h3>Pilih Waktu Booking</h3>
+        <div class="time-selection">
+            <div class="time-input">
+                <label for="startTime">Mulai:</label>
+                <input type="time" id="startTime" min="07:00" max="22:00" required>
+            </div>
+            <div class="time-input">
+                <label for="endTime">Selesai:</label>
+                <input type="time" id="endTime" min="07:00" max="22:00" required>
+            </div>
+        </div>
+        <div class="buttons">
+            <button class="button button-cancel" onclick="cancelTimeSelection()">Batal</button>
+            <button class="button button-next" onclick="confirmTimeSelection()">Lanjutkan</button>
+        </div>
+    </div>
+</div>
+
 
     <script>
 
@@ -508,6 +590,37 @@ function getEkskulName($db, $booking) {
         function closeRoomDetails() {
             document.getElementById('roomDetailsPopup').style.display = 'none';
         }
+
+
+        // Untuk Workshop - Tampilkan form pemilihan waktu
+        function showTimeSelection(roomId, roomName) {
+        selectedRoomId = roomId;
+        selectedRoomName = roomName;
+        document.getElementById('timeSelectionPopup').style.display = 'flex';
+        }
+
+        function cancelTimeSelection() {
+        document.getElementById('timeSelectionPopup').style.display = 'none';
+        }   
+
+        function confirmTimeSelection() {
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+    
+        if (!startTime || !endTime) {
+        alert('Harap pilih waktu mulai dan selesai');
+        return;
+        }
+    
+        if (startTime >= endTime) {
+        alert('Waktu selesai harus setelah waktu mulai');
+        return;
+        }
+    
+        // Lanjutkan ke halaman konfirmasi dengan parameter waktu
+        window.location.href = `form_booking.php?room_id=${selectedRoomId}&hari=<?= $hari ?>&start_time=${startTime}&end_time=${endTime}`;
+        }
+
     </script>
 </body>
 </html>

@@ -31,6 +31,23 @@ function resetBookingData($db) {
     }
 }
 
+// Hapus booking Workshop yang sudah lebih dari 24 jam
+$yesterday = date('Y-m-d', strtotime('-1 day'));
+$stmt = $db->prepare("
+    DELETE FROM bookings 
+    WHERE room_id IN (SELECT id FROM rooms WHERE building_id = 5)
+    AND booking_date <= :yesterday
+");
+$stmt->execute(['yesterday' => $yesterday]);
+
+// Update system_settings
+$stmt = $db->prepare("
+    INSERT INTO system_settings (setting_key, setting_value) 
+    VALUES ('last_reset', NOW())
+    ON DUPLICATE KEY UPDATE setting_value = NOW()
+");
+$stmt->execute();
+
 // Cek kapan terakhir reset
 $lastReset = $db->query("SELECT setting_value FROM system_settings WHERE setting_key = 'last_reset'")->fetchColumn();
 $currentWeek = date('Y-W');

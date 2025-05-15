@@ -43,14 +43,18 @@ function sendBookingNotification($db, $bookingId) {
     return true;
 }
 
+
 /**
  * Mengirim notifikasi status booking ke user
  */
 function sendBookingStatusNotification($db, $bookingId, $status) {
     // Dapatkan detail booking
     $stmt = $db->prepare("
-        SELECT b.*, r.nama_ruang, bg.nama_gedung, u.id as user_id
+        SELECT b.*, u.id as user_id, r.nama_ruang, bg.nama_gedung,
+               TIME_FORMAT(b.start_time, '%H:%i') as start_time,
+               TIME_FORMAT(b.end_time, '%H:%i') as end_time
         FROM bookings b
+        JOIN users u ON b.user_id = u.id
         JOIN rooms r ON b.room_id = r.id
         JOIN buildings bg ON r.building_id = bg.id
         JOIN users u ON b.user_id = u.id
@@ -63,11 +67,16 @@ function sendBookingStatusNotification($db, $bookingId, $status) {
         return false;
     }
     
+    $time_info = '';
+    if ($booking['start_time'] && $booking['end_time']) {
+        $time_info = " pada jam {$booking['start_time']} - {$booking['end_time']}";
+    }
+    
     // Status dalam bahasa Indonesia
     $statusText = ($status == 'approved') ? 'disetujui' : 'ditolak';
     
     // Buat pesan notifikasi
-    $message = "Permintaan booking ruang {$booking['nama_ruang']} ({$booking['nama_gedung']}) pada hari " . ucfirst($booking['hari']) . " telah $statusText oleh admin.";
+    $message = "Permintaan booking ruang {$booking['nama_ruang']} ({$booking['nama_gedung']}) pada hari " . ucfirst($booking['hari']) . $time_info . " telah $statusText oleh admin.";
     
     // Kirim notifikasi ke user
     return sendNotification($db, $booking['user_id'], $message);

@@ -58,6 +58,9 @@ if (!isset($_SESSION['user_id'])) {
   </style>
 </head>
 <body class="text-gray-800" style="background-color: #1a2b47;">
+<button class="menu-toggle" id="menuToggle" style="display:none;">
+        <i class="fas fa-bars"></i>
+</button>
   <div class="sidebar">
     <img src="assets/img/logo.png" alt="Logo" class="logo">
     <ul class="menu">

@@ -7,6 +7,15 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+// Get current day index (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+$currentDayIndex = date('w');
+// Convert to our system (1 = Senin, 2 = Selasa, ..., 5 = Jumat)
+// Sunday (0) -> no booking possible
+// Monday (1) -> index 1
+// Tuesday (2) -> index 2
+// etc.
+$currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +41,24 @@ if (!isset($_SESSION['user_id'])) {
             --text-dark: #333;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             --transition: all 0.3s ease;
+        }
+        
+        /* Style for disabled cards */
+        .card.disabled {
+            background-color: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        /* Info message style */
+        .info-message {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #333;
         }
     </style>
 </head>
@@ -78,18 +105,39 @@ if (!isset($_SESSION['user_id'])) {
             <div class="header">
                 <h1>PILIH HARI UNTUK BOOKING RUANG</h1>
             </div>
+            
+            <?php if ($currentDayIndex > 0 && $currentDayIndex < 6): // Only show this message on weekdays ?>
+            <div class="info-message">
+                <i class="fas fa-info-circle"></i> Anda hanya dapat booking ruangan untuk hari ini (<?= getDayName($currentDayIndex) ?>) dan hari-hari berikutnya dalam minggu ini.
+            </div>
+            <?php endif; ?>
+            
             <div class="grid">
-                <div class="card" onclick="location.href='booking_ruang.php?hari=senin'">Senin</div>
-                <div class="card" onclick="location.href='booking_ruang.php?hari=selasa'">Selasa</div>
-                <div class="card" onclick="location.href='booking_ruang.php?hari=rabu'">Rabu</div>
-                <div class="card" onclick="location.href='booking_ruang.php?hari=kamis'">Kamis</div>
-                <div class="card" onclick="location.href='booking_ruang.php?hari=jumat'">Jumat</div>
+                <?php
+                // Array of weekdays
+                $days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
+                $dayIndex = 1; // Monday = 1
+                
+                foreach ($days as $day):
+                    $isDisabled = $dayIndex < $currentDayIndexSystem;
+                    $cardClass = $isDisabled ? 'card disabled' : 'card';
+                    $clickHandler = $isDisabled ? '' : 'onclick="location.href=\'booking_ruang.php?hari=' . $day . '\'"';
+                ?>
+                    <div class="<?= $cardClass ?>" <?= $clickHandler ?>>
+                        <?= ucfirst($day) ?>
+                        <?php if ($isDisabled): ?>
+                            <div style="font-size: 12px; margin-top: 5px;">(Tidak tersedia)</div>
+                        <?php endif; ?>
+                    </div>
+                <?php
+                    $dayIndex++;
+                endforeach;
+                ?>
             </div>  
         </div>
     </div>
 
     <script>
-
         // Auto-update notification badge every 30 seconds
         setInterval(function() {
             fetch('get_notification_count.php')
@@ -148,3 +196,11 @@ if (!isset($_SESSION['user_id'])) {
 
 </body>
 </html>
+
+<?php
+// Helper function to get day name in Indonesian
+function getDayName($dayIndex) {
+    $days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    return $days[$dayIndex];
+}
+?>

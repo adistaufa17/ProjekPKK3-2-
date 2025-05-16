@@ -29,7 +29,7 @@ $start_time = isset($_GET['start_time']) ? $_GET['start_time'] : null;
 $end_time = isset($_GET['end_time']) ? $_GET['end_time'] : null;
 
 // Untuk Workshop, validasi waktu
-if ($room['room_id'] == 5 && (!$start_time || !$end_time)) {
+if ($room['building_id'] == 5 && (!$start_time || !$end_time)) {
     header("Location: booking_ruang.php?hari=" . $hari);
     exit();
 }

@@ -14,10 +14,12 @@ if (!isset($_SESSION['user_id'])) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Our Incredible Team</title>
+  <link rel="stylesheet" href="assets/css/responsive.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="assets/css/stylesidebar.css">
-  <link rel="stylesheet" href="assets/css/responsive.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+
   <style>
     /* Additional styles to prevent content overlap */
     .main-content {
@@ -26,19 +28,41 @@ if (!isset($_SESSION['user_id'])) {
       transition: margin-left 0.3s ease;
     }
     
-    @media screen and (max-width: 768px) {
+    /* @media  (max-width: 768px) {
       .main-content {
         margin-left: 70px;
         padding: 15px;
       }
-    }
-    
-    @media screen and (max-width: 480px) {
+    } */
+            @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding-top: 50px;
+            }
+
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                width: 200px;
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block !important;
+                position: fixed;
+                z-index: 1000;
+            }
+            }
+    /* @media screen and (max-width: 480px) {
       .main-content {
         margin-left: 60px;
         padding: 10px;
       }
-    }
+    } */
     
     /* Team card adjustments */
     .team-card {
@@ -61,34 +85,37 @@ if (!isset($_SESSION['user_id'])) {
 <button class="menu-toggle" id="menuToggle" style="display:none;">
         <i class="fas fa-bars"></i>
 </button>
-  <div class="sidebar">
-    <img src="assets/img/logo.png" alt="Logo" class="logo">
-    <ul class="menu">
-      <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> Beranda</a></li>
-      <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> Booking Ruang</a></li>
-      <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> Riwayat Booking</a></li>
-      <li class="menu-item active"><a href="teamdev.php"><i class="fas fa-users"></i> Team Developer</a></li>
-      <?php if ($_SESSION['role'] === 'admin'): ?>
-        <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> Kelola Booking</a></li>
-        <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> Laporan Ruang</a></li>
-      <?php endif; ?>
-      <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
-        <a href="notifications_page.php">
-          <i class="fas fa-bell"></i> 
-          <span class="menu-text">
-            Notifikasi
-            <?php 
-            $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
-            if ($unreadCount > 0): 
-            ?>
-              <span class="notification-badge"><?= $unreadCount ?></span>
+<div class="sidebar">
+        <img src="assets/img/logo.png" alt="Logo" class="logo">
+        <ul class="menu">
+            <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
+            <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
+            <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
+            <li class="menu-item active"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
+            <?php if ($_SESSION['role'] === 'admin'): ?>
+            <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+            <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
-          </span>
-        </a>
-      </li>
-      <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
-    </ul>
-  </div>
+            <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
+                <a href="notifications_page.php">
+                    <i class="fas fa-bell"></i> 
+                        <span class="menu-text">
+                        Notifikasi
+                        <?php 
+                    // Dapatkan jumlah notifikasi yang belum dibaca
+                    $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
+                     // Tampilkan badge jika ada notifikasi yang belum dibaca
+                    if ($unreadCount > 0): 
+                 ?>
+                <span class="notification-badge"><?= $unreadCount ?></span>
+            <?php endif; ?>
+        </span>
+    </a>
+</li>
+
+            <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
+        </ul>
+    </div>
   
   <!-- Main content area with proper margin -->
   <div class="main-content">

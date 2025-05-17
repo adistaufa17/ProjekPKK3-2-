@@ -43,7 +43,9 @@ if (isset($_POST['action']) && isset($_POST['booking_id'])) {
 
 // Get all bookings
 $stmt = $db->query("
-    SELECT b.*, r.nama_ruang, bg.nama_gedung, u.nama_ekstrakurikuler, u.email as user_email
+    SELECT b.*, r.nama_ruang, bg.nama_gedung, u.nama_ekstrakurikuler, 
+    TIME_FORMAT(b.start_time, '%H:%i') as start_time_format,
+    TIME_FORMAT(b.end_time, '%H:%i') as end_time_format
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     JOIN buildings bg ON r.building_id = bg.id
@@ -58,6 +60,13 @@ $statusMap = [
     'approved' => 'Disetujui',
     'rejected' => 'Ditolak'
 ];
+
+// Di bagian tampilan card, tambahkan:
+    if ($booking['start_time_format'] && $booking['end_time_format']): ?>
+    <div class="card-time">
+        <i class="fas fa-clock"></i> <?= $booking['start_time_format'] ?> - <?= $booking['end_time_format'] ?>
+    </div>
+<?php endif; 
 ?>
 
 <!DOCTYPE html>
@@ -180,6 +189,12 @@ $statusMap = [
             font-size: 12px;
             color: #666;
             margin-top: 5px;
+        }
+
+        .card-time {
+        font-size: 12px;
+        color: #555;
+        margin-top: 5px;
         }
 
         @media (max-width: 768px) {

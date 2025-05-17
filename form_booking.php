@@ -24,6 +24,16 @@ if (!in_array($hari, $valid_days)) {
     exit();
 }
 
+// Tambahkan parameter waktu
+$start_time = isset($_GET['start_time']) ? $_GET['start_time'] : null;
+$end_time = isset($_GET['end_time']) ? $_GET['end_time'] : null;
+
+// Untuk Workshop, validasi waktu
+if ($room['building_id'] == 5 && (!$start_time || !$end_time)) {
+    header("Location: booking_ruang.php?hari=" . $hari);
+    exit();
+}
+
 // Get room details
 $stmt = $db->prepare("SELECT r.*, b.nama_gedung FROM rooms r JOIN buildings b ON r.building_id = b.id WHERE r.id = :room_id");
 $stmt->execute(['room_id' => $room_id]);
@@ -50,17 +60,22 @@ if ($booking) {
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $current_date = date('Y-m-d');
+    
     $stmt = $db->prepare("
-        INSERT INTO bookings (user_id, room_id, hari, status)
-        VALUES (:user_id, :room_id, :hari, 'pending')
+        INSERT INTO bookings (user_id, room_id, hari, status, start_time, end_time, booking_date)
+        VALUES (:user_id, :room_id, :hari, 'pending', :start_time, :end_time, :booking_date)
     ");
     
     $result = $stmt->execute([
         'user_id' => $_SESSION['user_id'],
         'room_id' => $room_id,
-        'hari' => $hari
+        'hari' => $hari,
+        'start_time' => $start_time,
+        'end_time' => $end_time,
+        'booking_date' => $current_date
     ]);
-    
+        
     if ($result) {
         $_SESSION['success'] = "Booking berhasil! Menunggu konfirmasi admin.";
         header("Location: beranda.php");
@@ -69,6 +84,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Gagal membuat booking. Silakan coba lagi.";
     }
 }
+
+// Di bagian tampilan, tambahkan info waktu jika untuk Workshop
+if ($room['building_id'] == 5 && $start_time && $end_time): ?>
+    <div class="info-item">
+        <span class="info-label">Waktu:</span>
+        <span><?= date('H:i', strtotime($start_time)) ?> - <?= date('H:i', strtotime($end_time)) ?></span>
+    </div>
+<?php endif;
+
 ?>
 
 <!DOCTYPE html>

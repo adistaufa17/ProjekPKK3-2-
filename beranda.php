@@ -52,7 +52,7 @@ if (isset($_SESSION['reset_status'])) {
             background-size: cover;
             background-position: center;
             color: white;
-            min-height: 400px;
+            min-height: 700px;
             display: flex;
             align-items: center;
             padding: 60px 20px;
@@ -107,42 +107,33 @@ if (isset($_SESSION['reset_status'])) {
             width: 150px;
             height: 150px;
         }
-        
-        /* Latar Belakang */
-        .latar-belakang {
-            padding: 60px 20px;
-            background-color: #f9f9f9;
-        }
-        
-        .section-header {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .section-header h2 {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .line {
-            height: 3px;
-            width: 100px;
-            background-color: #3498db;
-            margin: 0 auto;
-        }
-        
-        .latar-content {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        
-        .latar-content p {
-            font-size: 1rem;
-            line-height: 1.8;
-            color: #666;
-        }
-        
+
+         .welcome-section {
+      text-align: center;
+      padding: 60px 20px;
+      background-color: #3498db;
+      color: white;
+    }
+
+    .welcome-section h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+
+    .welcome-section p {
+      font-size: 1.2em;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-top: 60px;
+    }
+
+    .section-header h2 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+
         /* Footer */
         footer {
             background-color: #1a2b47;
@@ -275,13 +266,30 @@ if (isset($_SESSION['reset_status'])) {
     <div class="sidebar active">
         <img src="assets/img/logo.png" alt="Logo" class="logo">
         <ul class="menu">
-            <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
+            <li class="menu-item active"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
-            <li class="menu-item active"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
-            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
+            <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
+            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i><span class="menu-text">Team Developer</span></a></li>     
+            <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
-            <li class="menu-item "><a href="notifications_page.php"><i class="fas fa-bell"></i> <span class="menu-text">Notifikasi</span></a></li>
+            <?php endif; ?>
+            <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
+                <a href="notifications_page.php">
+                    <i class="fas fa-bell"></i> 
+                    <span class="menu-text">
+                        Notifikasi
+                        <?php 
+                        // Dapatkan jumlah notifikasi yang belum dibaca
+                        $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
+                        // Tampilkan badge jika ada notifikasi yang belum dibaca
+                        if ($unreadCount > 0): 
+                        ?>
+                        <span class="notification-badge"><?= $unreadCount ?></span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            </li>
             <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
@@ -295,7 +303,7 @@ if (isset($_SESSION['reset_status'])) {
             <li class="menu-item active"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
             <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
-            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
+            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>

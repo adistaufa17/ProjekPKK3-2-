@@ -19,6 +19,16 @@
     --grid-padding: 25px;
   }
   
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+
   /* Reset and base styling */
   * {
     margin: 0;
@@ -144,6 +154,17 @@
   .available {
     background: linear-gradient(135deg, var(--available-color), #38a169);
   }
+
+  .room.pending {
+    background-color: var(--warning-color); /* kuning */
+    color: black;
+}
+
+.room.approved {
+    background-color: var(--booked-color); /* merah */
+    color: white;
+}
+
   
   .booked {
     background: linear-gradient(135deg, var(--booked-color), #c53030);

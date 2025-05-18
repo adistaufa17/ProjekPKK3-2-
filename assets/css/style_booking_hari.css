@@ -37,6 +37,15 @@
     overflow-y: auto;
   }
   
+  .status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
   .main-content {
     width: 100%;
     padding: 30px;

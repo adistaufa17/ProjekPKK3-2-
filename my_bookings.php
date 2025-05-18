@@ -366,7 +366,19 @@ $statusTexts = [
                     <?php foreach ($bookings as $booking): ?>
                         <?php 
                         $statusClass = 'status-' . $booking['status'];
-                        $statusText = $statusTexts[$booking['status']];
+$statusText = $statusTexts[$booking['status']] ?? ucfirst($booking['status']);
+
+// Tambahkan logika untuk status 'cancelled'
+if ($booking['status'] === 'cancelled') {
+    if ($booking['cancelled_by'] === 'user') {
+        $statusText = 'Dibatalkan oleh Anda';
+    } elseif ($booking['cancelled_by'] === 'admin') {
+        $statusText = 'Dibatalkan oleh Admin';
+    } else {
+        $statusText = 'Dibatalkan';
+    }
+}
+
                         ?>
                         <div class="card" data-status="<?= $booking['status'] ?>">
                             <div class="card-image">
@@ -382,27 +394,47 @@ $statusTexts = [
                                     <span><?= htmlspecialchars($_SESSION['nama_ekstrakurikuler']) ?></span>
                                 </div>
                                 <div class="card-details">
-                                    <div>
-                                        <span><i class="fas fa-calendar"></i> <?= ucfirst($booking['hari']) ?></span>
-                                        <div class="card-date"><i class="fas fa-clock"></i> <?= date('d-m-Y H:i', strtotime($booking['created_at'])) ?></div>
-                                    </div>
-                                    <?php if ($booking['status'] === 'approved'): ?>
-                                    <?php
-                                    // Periksa apakah sudah ada laporan untuk booking ini
-                                    $reportStmt = $db->prepare("SELECT id FROM room_reports WHERE booking_id = :booking_id");
-                                    $reportStmt->execute(['booking_id' => $booking['id']]);
-                                    $hasReport = $reportStmt->fetch();
-        
-                                    if (!$hasReport):
-                                    ?>
-                                    <a href="create_report.php?booking_id=<?= $booking['id'] ?>" class="report-btn" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 3px; text-decoration: none; display: inline-block; font-size: 14px;">
-                                        <i class="fas fa-clipboard-check"></i> Lapor Kondisi Ruang
-                                    </a>
-                                    <?php else: ?>
-                                        <span style="color: #28a745; font-size: 14px;"><i class="fas fa-check-circle"></i> Laporan Terkirim</span>
-                                        <?php endif; ?>
-                                        <?php endif; ?>
-                                    </div>
+    <div>
+        <span><i class="fas fa-calendar"></i> <?= ucfirst($booking['hari']) ?></span>
+        <div class="card-date"><i class="fas fa-clock"></i> <?= date('d-m-Y H:i', strtotime($booking['created_at'])) ?></div>
+    </div>
+
+    <?php if ($booking['status'] === 'approved'): ?>
+
+        <?php
+        // Cek apakah sudah ada laporan kondisi ruang
+        $reportStmt = $db->prepare("SELECT id FROM room_reports WHERE booking_id = :booking_id");
+        $reportStmt->execute(['booking_id' => $booking['id']]);
+        $hasReport = $reportStmt->fetch();
+        ?>
+
+        <!-- Tombol laporan kondisi -->
+        <?php if (!$hasReport): ?>
+            <a href="create_report.php?booking_id=<?= $booking['id'] ?>" class="report-btn" style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 3px; text-decoration: none; display: inline-block; font-size: 14px;">
+                <i class="fas fa-clipboard-check"></i> Lapor Kondisi Ruang
+            </a>
+        <?php else: ?>
+            <span style="color: #28a745; font-size: 14px;"><i class="fas fa-check-circle"></i> Laporan Terkirim</span>
+        <?php endif; ?>
+
+        <!-- Tombol atau status pembatalan -->
+        <?php if ($booking['cancel_status'] === null || $booking['cancel_status'] === 'rejected'): ?>
+    <form action="cancel_booking.php" method="GET" style="margin-top: 10px;">
+        <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+        <button type="submit" style="background-color: #dc3545; color: white; padding: 5px 10px; border-radius: 3px; border: none;">
+            <i class="fas fa-ban"></i> Ajukan Pembatalan
+        </button>
+    </form>
+<?php elseif ($booking['cancel_status'] === 'pending'): ?>
+    <p style="margin-top: 10px; color: orange;"><i class="fas fa-clock"></i> Menunggu persetujuan pembatalan</p>
+<?php elseif ($booking['cancel_status'] === 'approved'): ?>
+    <p style="margin-top: 10px; color: green;"><i class="fas fa-check-circle"></i> Pembatalan disetujui</p>
+<?php endif; ?>
+
+
+    <?php endif; ?>
+</div>
+
                             </div>
                         </div>
                     <?php endforeach; ?>

@@ -7,7 +7,6 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
-
 // Mark notification as read if requested
 if (isset($_GET['mark_read']) && is_numeric($_GET['mark_read'])) {
     markNotificationAsRead($db, $_GET['mark_read']);
@@ -254,30 +253,50 @@ $notifications = getUserNotifications($db, $_SESSION['user_id'], 50);
                         </a>
                     <?php endif; ?>
                 </div>
-
+                
                 <?php if (count($notifications) > 0): ?>
                     <?php foreach ($notifications as $notification): ?>
-                        <div class="notification-item <?= $notification['is_read'] ? '' : 'unread' ?>">
-                            <div class="notification-icon">
-                                <i class="fas fa-bell"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-message">
-                                    <?= htmlspecialchars($notification['message']) ?>
-                                </div>
-                                <div class="notification-time">
-                                    <i class="fas fa-clock"></i> <?= date('d M Y H:i', strtotime($notification['created_at'])) ?>
-                                </div>
-                            </div>
-                            <?php if (!$notification['is_read']): ?>
-                                <div class="notification-actions">
-                                    <a href="?mark_read=<?= $notification['id'] ?>" class="mark-read-btn">
-                                        <i class="fas fa-check"></i> Tandai Dibaca
-                                    </a>
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+    <div class="notification-item <?= $notification['is_read'] ? '' : 'unread' ?>">
+        <div class="notification-icon">
+            <i class="fas fa-bell"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-message">
+                <?= htmlspecialchars($notification['message']) ?>
+            </div>
+            <div class="notification-time">
+                <i class="fas fa-clock"></i> <?= date('d M Y H:i', strtotime($notification['created_at'])) ?>
+            </div>
+
+            <?php
+            // Cek apakah notifikasi ini adalah permintaan pembatalan booking
+            if ($_SESSION['role'] === 'admin' && preg_match('/Permintaan pembatalan booking ID (\d+)/', $notification['message'], $matches)):
+    $booking_id = $matches[1];
+    // Tampilkan tombol setuju/tolak hanya untuk admin
+?>
+            
+            <form action="process_admin_cancel.php" method="POST" style="margin-top: 10px;">
+                <input type="hidden" name="booking_id" value="<?= $booking_id ?>">
+                <button type="submit" name="action" value="approve" style="color: white; background-color: green; border: none; padding: 5px 10px; margin-right: 5px;">
+                    <i class="fas fa-check"></i> Setujui
+                </button>
+                <button type="submit" name="action" value="reject" style="color: white; background-color: red; border: none; padding: 5px 10px;">
+                    <i class="fas fa-times"></i> Tolak
+                </button>
+            </form>
+            <?php endif; ?>
+        </div>
+
+        <?php if (!$notification['is_read']): ?>
+            <div class="notification-actions">
+                <a href="?mark_read=<?= $notification['id'] ?>" class="mark-read-btn">
+                    <i class="fas fa-check"></i> Tandai Dibaca
+                </a>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php endforeach; ?>
+
                 <?php else: ?>
                     <div class="empty-notifications">
                         <i class="fas fa-bell-slash"></i>

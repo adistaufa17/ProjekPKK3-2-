@@ -8,14 +8,18 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
-// Get current day index (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
-$currentDayIndex = date('w');
-// Convert to our system (1 = Senin, 2 = Selasa, ..., 5 = Jumat)
-// Sunday (0) -> no booking possible
-// Monday (1) -> index 1
-// Tuesday (2) -> index 2
-// etc.
-$currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
+// Get current day and week info
+$today = new DateTime();
+$currentDayIndex = $today->format('w'); // 0=Minggu, 1=Senin, ..., 6=Sabtu
+$currentWeekNumber = $today->format('W');
+
+// Jika hari ini Sabtu (6) atau Minggu (0), enable semua hari di minggu depan
+if ($currentDayIndex == 0 || $currentDayIndex == 6) {
+    $currentDayIndexSystem = 0; // Reset ke 0 agar semua hari enable
+} else {
+    // Untuk hari kerja (Senin-Jumat), gunakan index normal
+    $currentDayIndexSystem = $currentDayIndex;
+}
 ?>
 
 <!DOCTYPE html>
@@ -60,6 +64,13 @@ $currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
             border-radius: 4px;
             color: #333;
         }
+
+        .current-week {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            color: #2c3e50;
+        }
     </style>
 </head>
 <body>
@@ -80,35 +91,40 @@ $currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
             <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
                 <a href="notifications_page.php">
                     <i class="fas fa-bell"></i> 
-                        <span class="menu-text">
+                    <span class="menu-text">
                         Notifikasi
                         <?php 
-                    // Dapatkan jumlah notifikasi yang belum dibaca
-                    $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
-                     // Tampilkan badge jika ada notifikasi yang belum dibaca
-                    if ($unreadCount > 0): 
-                 ?>
-                <span class="notification-badge"><?= $unreadCount ?></span>
-            <?php endif; ?>
-        </span>
-    </a>
-</li>
-
+                        // Dapatkan jumlah notifikasi yang belum dibaca
+                        $unreadCount = getUnreadNotificationCount($db, $_SESSION['user_id']);
+                        // Tampilkan badge jika ada notifikasi yang belum dibaca
+                        if ($unreadCount > 0): 
+                        ?>
+                        <span class="notification-badge"><?= $unreadCount ?></span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            </li>
             <li class="menu-item"><a href="logout_confirmation.php"><i class="fas fa-sign-out-alt"></i> <span class="menu-text">Logout</span></a></li>
         </ul>
     </div>
-
-
-
+    
     <div class="container">
         <div class="main-content">
             <div class="header">
                 <h1>PILIH HARI UNTUK BOOKING RUANG</h1>
             </div>
             
+            <div class="current-week">
+                Minggu ke-<?= $currentWeekNumber ?> Tahun <?= $today->format('Y') ?>
+            </div>
+            
             <?php if ($currentDayIndex > 0 && $currentDayIndex < 6): // Only show this message on weekdays ?>
             <div class="info-message">
                 <i class="fas fa-info-circle"></i> Anda hanya dapat booking ruangan untuk hari ini (<?= getDayName($currentDayIndex) ?>) dan hari-hari berikutnya dalam minggu ini.
+            </div>
+            <?php elseif ($currentDayIndex == 0 || $currentDayIndex == 6): ?>
+            <div class="info-message">
+                <i class="fas fa-info-circle"></i> Anda dapat booking ruangan untuk seluruh hari di minggu depan.
             </div>
             <?php endif; ?>
             
@@ -119,7 +135,8 @@ $currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
                 $dayIndex = 1; // Monday = 1
                 
                 foreach ($days as $day):
-                    $isDisabled = $dayIndex < $currentDayIndexSystem;
+                    // Nonaktifkan hanya jika hari kerja dan hari sudah lewat
+                    $isDisabled = ($currentDayIndexSystem > 0) && ($dayIndex < $currentDayIndexSystem);
                     $cardClass = $isDisabled ? 'card disabled' : 'card';
                     $clickHandler = $isDisabled ? '' : 'onclick="location.href=\'booking_ruang.php?hari=' . $day . '\'"';
                 ?>
@@ -159,7 +176,7 @@ $currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
             });
         }, 30000);
         
-   document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
             const mediaQuery = window.matchMedia('(max-width: 360px)');
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.querySelector('.sidebar');
@@ -192,7 +209,7 @@ $currentDayIndexSystem = $currentDayIndex == 0 ? 0 : $currentDayIndex;
                 }
             });
         });
-</script>
+    </script>
 
 </body>
 </html>

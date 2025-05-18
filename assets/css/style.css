@@ -343,3 +343,12 @@ footer {
     from { opacity: 1; }
     to { opacity: 0; }
 }
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}

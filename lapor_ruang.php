@@ -42,16 +42,16 @@ if (isset($_POST['action']) && isset($_POST['booking_id'])) {
 }
 
 // Get all bookings
-$stmt = $db->query("
-    SELECT b.*, r.nama_ruang, bg.nama_gedung, u.nama_ekstrakurikuler, 
-    TIME_FORMAT(b.start_time, '%H:%i') as start_time_format,
-    TIME_FORMAT(b.end_time, '%H:%i') as end_time_format
+$sql = "
+    SELECT b.*, r.nama_ruang, bg.nama_gedung, u.nama_ekstrakurikuler, u.email as user_email
     FROM bookings b
     JOIN rooms r ON b.room_id = r.id
     JOIN buildings bg ON r.building_id = bg.id
     JOIN users u ON b.user_id = u.id
-    ORDER BY b.status = 'pending' DESC, b.hari, r.nama_ruang
-");
+    ORDER BY (b.status = 'pending') DESC, b.hari, r.nama_ruang
+";
+
+$stmt = $db->query($sql); // <- INI WAJIB
 $bookings = $stmt->fetchAll();
 
 // Map status ke teks bahasa Indonesia
@@ -60,13 +60,6 @@ $statusMap = [
     'approved' => 'Disetujui',
     'rejected' => 'Ditolak'
 ];
-
-// Di bagian tampilan card, tambahkan:
-    if ($booking['start_time_format'] && $booking['end_time_format']): ?>
-    <div class="card-time">
-        <i class="fas fa-clock"></i> <?= $booking['start_time_format'] ?> - <?= $booking['end_time_format'] ?>
-    </div>
-<?php endif; 
 ?>
 
 <!DOCTYPE html>
@@ -191,12 +184,6 @@ $statusMap = [
             margin-top: 5px;
         }
 
-        .card-time {
-        font-size: 12px;
-        color: #555;
-        margin-top: 5px;
-        }
-
         @media (max-width: 768px) {
             .filters {
                 flex-direction: column;
@@ -239,10 +226,10 @@ $statusMap = [
         <ul class="menu">
             <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
-            <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
+            <li class="menu-item "><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
             <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
-            <li class="menu-item active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+            <li class="menu-item  active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
             <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
@@ -307,12 +294,14 @@ $statusMap = [
                 <?php if (count($bookings) > 0): ?>
                     <?php foreach ($bookings as $booking): ?>
                         <?php 
-                        $statusClass = 'status-' . $booking['status'];
-                        $statusText = $statusMap[$booking['status']];
+                        $status = $booking['status'] ?? 'unknown';
+                        $statusClass = 'status-' . $status;
+                        $statusText = $statusMap[$status] ?? ucfirst($status);
                         ?>
+
                         <div class="card" data-room="<?= htmlspecialchars($booking['nama_ruang']) ?>" 
-                             data-eskul="<?= htmlspecialchars($booking['nama_ekstrakurikuler']) ?>"
-                             data-status="<?= $booking['status'] ?>">
+                        data-eskul="<?= htmlspecialchars($booking['nama_ekstrakurikuler']) ?>"
+                        data-status="<?= $status ?>">
                             <div class="card-image">
                                 <i class="fas fa-door-open"></i>
                                 <?= htmlspecialchars($booking['nama_ruang']) ?>
@@ -331,29 +320,42 @@ $statusMap = [
                                     <?php endif; ?>
                                 </div>
                                 <div class="card-details">
-                                    <div>
-                                        <span><i class="fas fa-calendar"></i> <?= ucfirst($booking['hari']) ?></span>
-                                        <div class="card-date"><i class="fas fa-clock"></i> <?= date('d-m-Y H:i', strtotime($booking['created_at'])) ?></div>
-                                    </div>
-                                    <?php if ($booking['status'] === 'pending'): ?>
-                                        <div class="action-buttons">
-                                            <form method="post" action="">
-                                                <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
-                                                <input type="hidden" name="action" value="approve">
-                                                <button type="submit" class="approve-btn" onclick="return confirm('Yakin menyetujui booking ini?')">
-                                                    <i class="fas fa-check"></i> Setujui
-                                                </button>
-                                            </form>
-                                            <form method="post" action="">
-                                                <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
-                                                <input type="hidden" name="action" value="reject">
-                                                <button type="submit" class="reject-btn" onclick="return confirm('Yakin menolak booking ini?')">
-                                                    <i class="fas fa-times"></i> Tolak
-                                                </button>
-                                            </form>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
+<div>
+        <span><i class="fas fa-calendar"></i> <?= ucfirst($booking['hari']) ?></span>
+        <div class="card-date"><i class="fas fa-clock"></i> <?= date('d-m-Y H:i', strtotime($booking['created_at'])) ?></div>
+    </div>
+
+    <?php if ($booking['status'] === 'pending'): ?>
+        <!-- Tombol untuk admin menyetujui atau menolak booking -->
+        <div class="action-buttons">
+            <form method="post" action="process_booking.php">
+                <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+                <input type="hidden" name="action" value="approve">
+                <button type="submit" class="approve-btn" onclick="return confirm('Yakin menyetujui booking ini?')">
+                    <i class="fas fa-check"></i> Setujui
+                </button>
+            </form>
+            <form method="post" action="process_booking.php">
+                <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+                <input type="hidden" name="action" value="reject">
+                <button type="submit" class="reject-btn" onclick="return confirm('Yakin menolak booking ini?')">
+                    <i class="fas fa-times"></i> Tolak
+                </button>
+            </form>
+        </div>
+    <?php elseif ($booking['status'] === 'approved'): ?>
+        <!-- Tombol untuk admin membatalkan booking -->
+        <div class="action-buttons">
+            <form method="post" action="process_cancel.php" onsubmit="return confirm('Yakin ingin membatalkan booking ini?');">
+                <input type="hidden" name="booking_id" value="<?= $booking['id'] ?>">
+                <button type="submit" name="action" value="approve_cancel" class="approve-btn">
+                    <i class="fas fa-check"></i> Batalkan Booking
+                </button>
+            </form>
+        </div>
+    <?php endif; ?>
+</div>
+
                             </div>
                         </div>
                     <?php endforeach; ?>

@@ -1,84 +1,89 @@
 <?php
 session_start();
 require_once 'config/database.php';
+require_once 'notifications.php'; 
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
 
-$room_id = isset($_GET['room_id']) ? intval($_GET['room_id']) : 0;
-$hari = isset($_GET['hari']) ? $_GET['hari'] : 'senin';
-$hari = strtolower($hari);
-
-// Validasi hari
-$valid_days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
-if (!in_array($hari, $valid_days)) {
-    $hari = 'senin';
+// Check if parameters exist
+if (!isset($_GET['room_id']) || !isset($_GET['hari'])) {
+    header("Location: booking_hari.php");
+    exit();
 }
 
-// Ambil info ruangan
-$stmt = $db->prepare("SELECT * FROM rooms WHERE id = :id");
-$stmt->execute(['id' => $room_id]);
+$room_id = $_GET['room_id'];
+$hari = $_GET['hari'];
+
+// Validate hari parameter
+$valid_days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat'];
+if (!in_array($hari, $valid_days)) {
+    header("Location: booking_hari.php");
+    exit();
+}
+
+// Get room details
+$stmt = $db->prepare("SELECT r.*, b.nama_gedung FROM rooms r JOIN buildings b ON r.building_id = b.id WHERE r.id = :room_id");
+$stmt->execute(['room_id' => $room_id]);
 $room = $stmt->fetch();
 
 if (!$room) {
-    die("Ruangan tidak ditemukan.");
+    header("Location: booking_hari.php");
+    exit();
 }
 
-$error = '';
-$success = '';
+// Check if room is already booked
+$stmt = $db->prepare("
+    SELECT * FROM bookings 
+    WHERE room_id = :room_id AND hari = :hari AND status IN ('pending', 'approved')
+");
+$stmt->execute(['room_id' => $room_id, 'hari' => $hari]);
+$booking = $stmt->fetch();
 
+if ($booking) {
+    $_SESSION['error'] = "Ruangan ini sudah dipesan untuk hari " . ucfirst($hari) . ".";
+    header("Location: booking_ruang.php?hari=" . $hari);
+    exit();
+}
+
+// Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Ambil data dari form
-    $start_time = isset($_POST['start_time']) ? $_POST['start_time'] : null;
-    $end_time = isset($_POST['end_time']) ? $_POST['end_time'] : null;
+    $start_time = null;
+    $end_time = null;
 
-    // Validasi form
-    if (strtolower($room['nama_ruang']) == 'workshop') {
-        if (!$start_time || !$end_time) {
-            $error = "Jam mulai dan jam selesai wajib diisi untuk Workshop.";
-        } elseif ($start_time >= $end_time) {
+    // Validasi waktu hanya jika ruang adalah workshop
+    if (strtolower($room['nama_ruang']) === 'workshop') {
+        $start_time = $_POST['start_time'];
+        $end_time = $_POST['end_time'];
+
+        // Validasi jam: jam selesai harus setelah jam mulai
+        if (strtotime($end_time) <= strtotime($start_time)) {
             $error = "Jam selesai harus lebih besar dari jam mulai.";
         }
     }
 
-    if (!$error) {
-        // Cek bentrok booking di database
-        if (strtolower($room['nama_ruang']) == 'workshop') {
-            // Cek bentrok berdasarkan jam mulai dan selesai
-            $stmtCheck = $db->prepare("SELECT * FROM bookings WHERE room_id = :room_id AND hari = :hari AND status IN ('pending', 'approved') 
-                                       AND ((start_time < :end_time AND end_time > :start_time))");
-            $stmtCheck->execute([
-                'room_id' => $room_id,
-                'hari' => $hari,
-                'start_time' => $start_time,
-                'end_time' => $end_time
-            ]);
-            $conflict = $stmtCheck->fetch();
+    if (!isset($error)) {
+        $stmt = $db->prepare("
+            INSERT INTO bookings (user_id, room_id, hari, status, start_time, end_time)
+            VALUES (:user_id, :room_id, :hari, 'pending', :start_time, :end_time)
+        ");
+
+        $result = $stmt->execute([
+            'user_id' => $_SESSION['user_id'],
+            'room_id' => $room_id,
+            'hari' => $hari,
+            'start_time' => $start_time,
+            'end_time' => $end_time
+        ]);
+
+        if ($result) {
+            $_SESSION['success'] = "Booking berhasil! Menunggu konfirmasi admin.";
+            header("Location: beranda.php");
+            exit();
         } else {
-            // Cek booking untuk ruangan selain Workshop tanpa jam
-            $stmtCheck = $db->prepare("SELECT * FROM bookings WHERE room_id = :room_id AND hari = :hari AND status IN ('pending', 'approved')");
-            $stmtCheck->execute(['room_id' => $room_id, 'hari' => $hari]);
-            $conflict = $stmtCheck->fetch();
-        }
-
-        if ($conflict) {
-            $error = "Ruangan sudah dipesan pada waktu yang dipilih.";
-        } else {
-            // Simpan booking ke database dengan status pending
-            $stmtInsert = $db->prepare("INSERT INTO bookings (room_id, user_id, hari, status, start_time, end_time) VALUES 
-                                      (:room_id, :user_id, :hari, 'pending', :start_time, :end_time)");
-
-            $stmtInsert->execute([
-                'room_id' => $room_id,
-                'user_id' => $_SESSION['user_id'],
-                'hari' => $hari,
-                'start_time' => $start_time ?? null,
-                'end_time' => $end_time ?? null,
-            ]);
-
-            $success = "Booking berhasil dibuat. Tunggu konfirmasi admin.";
+            $error = "Terjadi kesalahan saat menyimpan data. Silakan coba lagi.";
         }
     }
 }
@@ -89,38 +94,115 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Form Booking Ruang - <?= htmlspecialchars($room['nama_ruang']) ?></title>
-    <link rel="stylesheet" href="assets/css/style_booking_ruang.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Konfirmasi Booking - Sistem Pemesanan Ruang</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+        }
+        
+        .booking-info {
+            background-color: #f0f8ff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            width: 150px;
+        }
+        
+        .back-btn {
+            background-color: #ccc;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                width: 90%;
+                max-width: 100%;
+                padding: 15px;
+            }
+            
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .info-label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Booking Ruang: <?= htmlspecialchars($room['nama_ruang']) ?></h2>
-    <p>Hari: <?= ucfirst($hari) ?></p>
+<div class="form-container">
+    <h2>Konfirmasi Booking Ruang</h2>
 
-    <?php if ($error): ?>
-        <p style="color: red;"><?= htmlspecialchars($error) ?></p>
+    <?php if (isset($error)): ?>
+        <div style="color: red; margin-bottom: 15px; text-align: center;"><?= $error ?></div>
     <?php endif; ?>
 
-    <?php if ($success): ?>
-        <p style="color: green;"><?= htmlspecialchars($success) ?></p>
-        <p><a href="booking_ruang.php?hari=<?= $hari ?>">Kembali ke daftar ruang</a></p>
-        <?php exit; ?>
-    <?php endif; ?>
+    <form method="post">
+        <div class="booking-info">
+            <div class="info-item">
+                <span class="info-label">Ekstrakurikuler:</span>
+                <span><?= htmlspecialchars($_SESSION['nama_ekstrakurikuler']) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Gedung:</span>
+                <span><?= htmlspecialchars($room['nama_gedung']) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Ruang:</span>
+                <span><?= htmlspecialchars($room['nama_ruang']) ?></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Hari:</span>
+                <span><?= ucfirst($hari) ?></span>
+            </div>
+        </div>
 
-    <form method="POST" action="">
-        <?php if (strtolower($room['nama_ruang']) == 'workshop'): ?>
-            <label for="start_time">Jam Mulai:</label><br>
-            <input type="time" id="start_time" name="start_time" required><br><br>
-
-            <label for="end_time">Jam Selesai:</label><br>
-            <input type="time" id="end_time" name="end_time" required><br><br>
-        <?php else: ?>
-            <p>Tidak perlu mengisi jam untuk ruangan ini.</p>
+        <?php if (strtolower(trim($room['nama_ruang'])) === 'workshop'): ?>
+            <div class="info-item">
+                <label class="info-label" for="start_time">Jam Mulai:</label>
+                <input type="time" name="start_time" id="start_time" required>
+            </div>
+            <div class="info-item">
+                <label class="info-label" for="end_time">Jam Selesai:</label>
+                <input type="time" name="end_time" id="end_time" required>
+            </div>
         <?php endif; ?>
 
-        <button type="submit">Pesan Ruang</button>
+        <div style="display: flex; justify-content: space-between;">
+            <button type="button" class="back-btn" onclick="history.back()">Kembali</button>
+            <button type="submit">Konfirmasi Booking</button>
+        </div>
     </form>
+</div>
 
-    <p><a href="booking_ruang.php?hari=<?= $hari ?>">Batal dan kembali</a></p>
+
+        </div>
+    </div>
 
     <script>
         // Auto-update notification badge every 30 seconds

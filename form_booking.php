@@ -33,7 +33,7 @@ if (!$room) {
     header("Location: booking_hari.php");
     exit();
 }
-
+//strtolower
 // Check if room is already booked
 $stmt = $db->prepare("
     SELECT * FROM bookings 
@@ -48,34 +48,19 @@ if ($booking) {
     exit();
 }
 
-// Process form submission
+// Process form submissionstart
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $start_time = null;
-    $end_time = null;
-
-    // Validasi waktu hanya jika ruang adalah workshop
-    if (strtolower($room['nama_ruang']) === 'workshop') {
-        $start_time = $_POST['start_time'];
-        $end_time = $_POST['end_time'];
-
-        // Validasi jam: jam selesai harus setelah jam mulai
-        if (strtotime($end_time) <= strtotime($start_time)) {
-            $error = "Jam selesai harus lebih besar dari jam mulai.";
-        }
-    }
 
     if (!isset($error)) {
         $stmt = $db->prepare("
-            INSERT INTO bookings (user_id, room_id, hari, status, start_time, end_time)
-            VALUES (:user_id, :room_id, :hari, 'pending', :start_time, :end_time)
+            INSERT INTO bookings (user_id, room_id, hari, status)
+            VALUES (:user_id, :room_id, :hari, 'pending')
         ");
 
         $result = $stmt->execute([
             'user_id' => $_SESSION['user_id'],
             'room_id' => $room_id,
             'hari' => $hari,
-            'start_time' => $start_time,
-            'end_time' => $end_time
         ]);
 
         if ($result) {
@@ -181,17 +166,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span><?= ucfirst($hari) ?></span>
             </div>
         </div>
-
-        <?php if (strtolower(trim($room['nama_ruang'])) === 'workshop'): ?>
-            <div class="info-item">
-                <label class="info-label" for="start_time">Jam Mulai:</label>
-                <input type="time" name="start_time" id="start_time" required>
-            </div>
-            <div class="info-item">
-                <label class="info-label" for="end_time">Jam Selesai:</label>
-                <input type="time" name="end_time" id="end_time" required>
-            </div>
-        <?php endif; ?>
 
         <div style="display: flex; justify-content: space-between;">
             <button type="button" class="back-btn" onclick="history.back()">Kembali</button>

@@ -3,12 +3,6 @@ session_start();
 require_once 'config/database.php';
 require_once 'notifications.php';
 
-function getWorkshopBookings($db, $room_id, $hari) {
-    $stmt = $db->prepare("SELECT * FROM bookings WHERE room_id = :room_id AND hari = :hari AND status IN ('pending', 'approved') ORDER BY start_time");
-    $stmt->execute(['room_id' => $room_id, 'hari' => $hari]);
-    return $stmt->fetchAll();
-}
-
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -276,10 +270,10 @@ function getEkskulName($db, $booking) {
             <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item active"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
             <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
+            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
-            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i> Team Developer</a></li>
             <?php endif; ?>
             <li class="menu-item">
                 <a href="notifications_page.php">
@@ -302,109 +296,81 @@ function getEkskulName($db, $booking) {
     </button>
 
     <div class="container">
-        <div class="main-content">
-            <div class="header">
-                <h1>Booking Ruang untuk Hari <?= ucfirst($hari) ?></h1>
-            </div>
-            
-            <!-- Mobile Day Navigation -->
-            <div class="day-navigation">
-                <select id="daySelect">
-                    <option value="senin" <?= $hari == 'senin' ? 'selected' : '' ?>>Senin</option>
-                    <option value="selasa" <?= $hari == 'selasa' ? 'selected' : '' ?>>Selasa</option>
-                    <option value="rabu" <?= $hari == 'rabu' ? 'selected' : '' ?>>Rabu</option>
-                    <option value="kamis" <?= $hari == 'kamis' ? 'selected' : '' ?>>Kamis</option>
-                    <option value="jumat" <?= $hari == 'jumat' ? 'selected' : '' ?>>Jumat</option>
-                </select>
-                <button onclick="changeDayMobile()"><i class="fas fa-check"></i> Pilih</button>
-            </div>
-            
-            <?php foreach ($buildings as $building): ?>
-    <!-- Get rooms for this building -->
-    <?php 
-    $stmt = $db->prepare("SELECT * FROM rooms WHERE building_id = :building_id ORDER BY nama_ruang ASC");
-    $stmt->execute(['building_id' => $building['id']]);
-    $rooms = $stmt->fetchAll();
-
-    if (count($rooms) == 0) continue;
-    ?>
-
-    <div class="building-header"><?= htmlspecialchars($building['nama_gedung']) ?></div>
-    <div class="room-grid">
-        <div class="room-row">
-            <?php foreach ($rooms as $room): ?>
-                <?php if (strtolower($room['nama_ruang']) == 'workshop'): ?>
-                    <?php
-                    $workshopBookings = getWorkshopBookings($db, $room['id'], $hari);
-                    if (count($workshopBookings) > 0):
-                        foreach ($workshopBookings as $booking):
-                            $roomClass = 'room ' . $booking['status'];
-                            $title = htmlspecialchars($room['nama_ruang']) . " ({$booking['start_time']} - {$booking['end_time']}) dipesan oleh " . htmlspecialchars(getEkskulName($db, $booking));
-                    ?>
-                            <div class="<?= $roomClass ?>" 
-                                title="<?= $title ?>"
-                                onclick="showRoomDetails(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?> (<?= $booking['start_time'] ?> - <?= $booking['end_time'] ?>)', '<?= htmlspecialchars(getEkskulName($db, $booking)) ?>', '<?= $booking['status'] ?>', '<?= $booking['start_time'] ?>', '<?= $booking['end_time'] ?>')">
-                                <?= htmlspecialchars($room['nama_ruang']) ?> (<?= $booking['start_time'] ?> - <?= $booking['end_time'] ?>)
-                            </div>
-                    <?php
-                        endforeach;
-                    else:
-                    ?>
-                        <div class="room available" onclick="bookRoom(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>')">
-                            <?= htmlspecialchars($room['nama_ruang']) ?>
-                        </div>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <?php
-                    $booking = isRoomBooked($db, $room['id'], $hari);
-                    if ($booking):
-                        $roomClass = 'room ' . $booking['status'];
-                    ?>
-                        <div class="<?= $roomClass ?>" 
-                            onclick="showRoomDetails(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>', '<?= htmlspecialchars(getEkskulName($db, $booking)) ?>', '<?= $booking['status'] ?>', '<?= $booking['start_time'] ?>', '<?= $booking['end_time'] ?>')" 
-                            title="<?= htmlspecialchars($room['nama_ruang']) ?> - Sudah dipesan oleh <?= htmlspecialchars(getEkskulName($db, $booking)) ?>">
-                            <?= htmlspecialchars($room['nama_ruang']) ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="room available" onclick="bookRoom(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>')">
-                            <?= htmlspecialchars($room['nama_ruang']) ?>
-                        </div>
-                    <?php endif; ?>
-                <?php endif; ?>
-            <?php endforeach; ?>
+    <div class="main-content">
+        <div class="header">
+            <h1>Booking Ruang untuk Hari <?= ucfirst($hari) ?></h1>
         </div>
-    </div>
-<?php endforeach; ?>
 
+        <div class="day-navigation">
+            <select id="daySelect">
+                <?php foreach ($valid_days as $day): ?>
+                    <option value="<?= $day ?>" <?= $hari == $day ? 'selected' : '' ?>><?= ucfirst($day) ?></option>
+                <?php endforeach; ?>
+            </select>
+            <button onclick="changeDayMobile()"><i class="fas fa-check"></i> Pilih</button>
+        </div>
+
+        <?php foreach ($buildings as $building): ?>
+            <?php 
+            $stmt = $db->prepare("SELECT * FROM rooms WHERE building_id = :building_id ORDER BY nama_ruang ASC");
+            $stmt->execute(['building_id' => $building['id']]);
+            $rooms = $stmt->fetchAll();
+
+            if (count($rooms) == 0) continue;
+            ?>
+
+            <div class="building-header"><?= htmlspecialchars($building['nama_gedung']) ?></div>
+            <div class="room-grid">
+                <div class="room-row">
+                    <?php foreach ($rooms as $room): ?>
+                        <?php
+                        $booking = isRoomBooked($db, $room['id'], $hari);
+                        if ($booking):
+                            $roomClass = 'room ' . $booking['status'];
+                        ?>
+                            <div class="<?= $roomClass ?>"
+                                 onclick="showRoomDetails(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>', '<?= htmlspecialchars(getEkskulName($db, $booking)) ?>', '<?= $booking['status'] ?>')"
+                                 title="<?= htmlspecialchars($room['nama_ruang']) ?> - Sudah dipesan oleh <?= htmlspecialchars(getEkskulName($db, $booking)) ?>">
+                                 <?= htmlspecialchars($room['nama_ruang']) ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="room available" onclick="bookRoom(<?= $room['id'] ?>, '<?= htmlspecialchars($room['nama_ruang']) ?>')">
+                                <?= htmlspecialchars($room['nama_ruang']) ?>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
 </div>
 
-    <!-- Room Booking Popup -->
-    <div class="room-popup" id="roomPopup">
-        <div class="room-details">
-            <p class="booking-message">Anda akan memesan <span id="roomName"></span> untuk hari <span><?= ucfirst($hari) ?></span>.</p>
-            <div class="buttons">
-                <button class="button button-cancel" onclick="cancelBooking()">Batal</button>
-                <button class="button button-next" onclick="confirmBooking()">Konfirmasi Booking</button>
-            </div>
+<!-- Popup Booking -->
+<div class="room-popup" id="roomPopup">
+    <div class="room-details">
+        <p class="booking-message">Anda akan memesan <span id="roomName"></span> untuk hari <span><?= ucfirst($hari) ?></span>.</p>
+        <div class="buttons">
+            <button class="button button-cancel" onclick="cancelBooking()">Batal</button>
+            <button class="button button-next" onclick="confirmBooking()">Konfirmasi Booking</button>
         </div>
     </div>
+</div>
 
-    <!-- Room Details Popup -->
-    <div class="room-popup" id="roomDetailsPopup" style="display: none;">
-        <div class="room-details">
-            <h3>Detail Ruangan</h3>
-            <div class="room-info" style="margin: 20px 0; line-height: 1.6;">
-                <p><strong>Nama Ruang:</strong> <span id="detailRoomName"></span></p>
-                <p><strong>Dipesan oleh:</strong> <span id="detailEkskul"></span></p>
-                <p><strong>Status:</strong> <span id="detailStatus"></span></p>
-                <p id="detailWaktu"></p>
-
-            </div>
-            <div class="buttons">
-                <button class="button button-cancel" onclick="closeRoomDetails()">Tutup</button>
-            </div>
+<!-- Popup Detail -->
+<div class="room-popup" id="roomDetailsPopup" style="display: none;">
+    <div class="room-details">
+        <h3>Detail Ruangan</h3>
+        <div class="room-info" style="margin: 20px 0; line-height: 1.6;">
+            <p><strong>Nama Ruang:</strong> <span id="detailRoomName"></span></p>
+            <p><strong>Dipesan oleh:</strong> <span id="detailEkskul"></span></p>
+            <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+        </div>
+        <div class="buttons">
+            <button class="button button-cancel" onclick="closeRoomDetails()">Tutup</button>
         </div>
     </div>
+</div>
+
 
     <script>
 
@@ -439,7 +405,7 @@ function getEkskulName($db, $booking) {
             const mediaQuery = window.matchMedia('(max-width: 360px)');
             const menuToggle = document.getElementById('menuToggle');
             const sidebar = document.querySelector('.sidebar');
-            
+           
             function handleScreenChange(e) {
                 if (e.matches) {
                     menuToggle.style.display = 'block';
@@ -499,7 +465,7 @@ function getEkskulName($db, $booking) {
             }
         }
         
-function showRoomDetails(roomId, roomName, ekskul, status, startTime, endTime) {
+function showRoomDetails(roomId, roomName, ekskul, status) {
     document.getElementById('detailRoomName').textContent = roomName;
     document.getElementById('detailEkskul').textContent = ekskul;
 
@@ -519,30 +485,13 @@ function showRoomDetails(roomId, roomName, ekskul, status, startTime, endTime) {
             break;
     }
 
-    if (roomName.toLowerCase().includes('workshop') && startTime && endTime) {
-    waktuElem.innerHTML = `<strong>Waktu:</strong> ${startTime} - ${endTime}`;
-} else {
-    waktuElem.innerHTML = '';
-}
-
 
     document.getElementById('detailStatus').textContent = statusText;
 
-    // 👇 Tambahkan jam jika ada
-    const waktuElem = document.getElementById('detailWaktu');
-    if (startTime && endTime) {
-        waktuElem.innerHTML = `<strong>Waktu:</strong> ${startTime} - ${endTime}`;
-    } else {
-        waktuElem.innerHTML = '';
-    }
 
     document.getElementById('roomDetailsPopup').style.display = 'flex';
 }
 
-
-
-
-        
         function closeRoomDetails() {
             document.getElementById('roomDetailsPopup').style.display = 'none';
         }

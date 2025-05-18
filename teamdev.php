@@ -263,5 +263,19 @@ if (!isset($_SESSION['user_id'])) {
       </div>
     </div>
   </div>
+
+  <script>
+    // Add JavaScript for responsive sidebar toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.getElementById('menuToggle');
+      const sidebar = document.querySelector('.sidebar');
+      
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          sidebar.classList.toggle('active');
+        });
+      }
+    });
+  </script>
 </body>
 </html>

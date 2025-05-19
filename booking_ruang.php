@@ -8,6 +8,10 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+if ($_SESSION['role'] === 'admin') {
+    $pendingCountSidebar = getPendingBookingCount($db);
+}
+
 // Get hari parameter
 $hari = isset($_GET['hari']) ? $_GET['hari'] : 'senin';
 $hari = strtolower($hari);
@@ -272,7 +276,17 @@ function getEkskulName($db, $booking) {
             <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
             <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
-            <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+             <li class="menu-item">
+                <a href="lapor_ruang.php">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">
+                        Kelola Booking
+                        <?php if ($pendingCountSidebar > 0): ?>
+                            <span class="notification-badge"><?= $pendingCountSidebar ?></span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            </li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
             <li class="menu-item">

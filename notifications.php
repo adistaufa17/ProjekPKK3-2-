@@ -115,6 +115,12 @@ function sendRoomReportNotification($db, $reportId) {
     return true;
 }
 
+function getPendingBookingCount($db) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM bookings WHERE status = 'pending'");
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
 /**
  * Mendapatkan jumlah notifikasi yang belum dibaca
  */

@@ -53,6 +53,8 @@ $sql = "
 
 $stmt = $db->query($sql); // <- INI WAJIB
 $bookings = $stmt->fetchAll();
+$pendingCountSidebar = getPendingBookingCount($db);
+
 
 // Map status ke teks bahasa Indonesia
 $statusMap = [
@@ -160,6 +162,9 @@ $statusMap = [
             background-color: #3498db;
             color: white;
         }
+
+
+
         .badge {
             display: inline-block;
             min-width: 20px;
@@ -229,7 +234,18 @@ $statusMap = [
             <li class="menu-item "><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
             <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
-            <li class="menu-item  active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+            <li class="menu-item active">
+                <a href="lapor_ruang.php">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="menu-text">
+                        Kelola Booking
+                        <?php if ($pendingCountSidebar > 0): ?>
+                            <span class="notification-badge"><?= $pendingCountSidebar ?></span>
+                        <?php endif; ?>
+                    </span>
+                </a>
+            </li>
+
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
             <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">

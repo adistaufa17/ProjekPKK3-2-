@@ -153,3 +153,11 @@
 }
 
 
+        .notification-badge {
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    padding: 3px 7px;
+    border-radius: 12px;
+    margin-left: 5px;
+}

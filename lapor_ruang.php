@@ -236,7 +236,7 @@ $statusMap = [
             <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> <span class="menu-text">Beranda</span></a></li>
             <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> <span class="menu-text">Booking Ruang</span></a></li>
             <li class="menu-item "><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
-            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
+            <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item  active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span>  <i class="fa fa-bell"></i>
   <span id="notifBadge" class="badge badge-danger" style="display:none; margin-left: 5px;">0</span></a></li>

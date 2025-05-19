@@ -104,7 +104,7 @@ $bookings = $stmt->fetchAll();
         <li class="menu-item"><a href="beranda.php"><i class="fas fa-home"></i> Beranda</a></li>
         <li class="menu-item"><a href="booking_hari.php"><i class="fas fa-calendar-check"></i> Booking Ruang</a></li>
         <li class="menu-item"><a href="my_bookings.php"><i class="fas fa-history"></i> Riwayat Booking</a></li>
-        <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i> Team Developer</a></li>
+        <li class="menu-item"><a href="teamdev.php"><i class="fas fa-users"></i> Team Developer</a></li>
         <?php if ($_SESSION['role'] === 'admin'): ?>
             <li class="menu-item"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> Kelola Booking</a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> Laporan Ruang</a></li>

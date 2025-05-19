@@ -46,3 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['boo
     header("Location: lapor_ruang.php");
     exit();
 }
+// Setelah booking berhasil disimpan
+$admin_id = 3; // ID admin, pastikan ini sesuai dengan data di tabel users
+$message = "Permintaan booking ruang baru dari user ID $user_id menunggu persetujuan.";
+
+$stmt = $pdo->prepare("INSERT INTO notifications (user_id, message, is_read) VALUES (?, ?, 0)");
+$stmt->execute([$admin_id, $message]);
+

@@ -181,6 +181,17 @@ function sendCancellationNotification($db, $user_id, $booking_id, $cancelled_by)
            : "Permintaan pembatalan Anda telah disetujui oleh admin.";
        sendNotification($db, $user_id, $message);
    }
+
+$stmt = $pdo->prepare("SELECT * FROM notifications WHERE user_id = ? AND is_read = 0 ORDER BY created_at DESC");
+$stmt->execute([3]); // 3 adalah ID admin
+
+$notifs = $stmt->fetchAll();
+
+foreach ($notifs as $notif) {
+    echo "<div class='alert alert-info'>{$notif['message']}</div>";
+}
+
 ?>
+
 
 

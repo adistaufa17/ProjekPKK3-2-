@@ -13,6 +13,13 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
+// Hitung notifikasi belum dibaca & belum ditangani
+$stmt = $db->query("SELECT COUNT(*) AS total FROM notifications WHERE is_read = 0");
+$row = $stmt->fetch(PDO::FETCH_ASSOC);
+echo $row['total'];
+
+
 // Process status update
 if (isset($_POST['action']) && isset($_POST['booking_id'])) {
     $action = $_POST['action'];
@@ -60,6 +67,8 @@ $statusMap = [
     'approved' => 'Disetujui',
     'rejected' => 'Ditolak'
 ];
+
+
 ?>
 
 <!DOCTYPE html>
@@ -229,7 +238,8 @@ $statusMap = [
             <li class="menu-item "><a href="my_bookings.php"><i class="fas fa-history"></i> <span class="menu-text">Riwayat Booking</span></a></li>
             <li class="menu-item"><a href="teamdev.php"><i class="fas fa-home"></i><span class="menu-text">Team Developer</span></a></li>     
             <?php if ($_SESSION['role'] === 'admin'): ?>
-            <li class="menu-item  active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span></a></li>
+            <li class="menu-item  active"><a href="lapor_ruang.php"><i class="fas fa-clipboard-list"></i> <span class="menu-text">Kelola Booking</span>  <i class="fa fa-bell"></i>
+  <span id="notifBadge" class="badge badge-danger" style="display:none; margin-left: 5px;">0</span></a></li>
             <li class="menu-item"><a href="view_reports.php"><i class="fas fa-clipboard-check"></i> <span class="menu-text">Laporan Ruang</span></a></li>
             <?php endif; ?>
             <li class="menu-item <?= basename($_SERVER['PHP_SELF']) == 'notifications_page.php' ? 'active' : '' ?>">
@@ -479,6 +489,24 @@ $statusMap = [
                 }
             });
         }, 30000);
+        
+        function cekNotifikasi() {
+            fetch("check_notifications.php")
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById("notif-badge");
+                    if (data.jumlah > 0) {
+                        badge.textContent = data.jumlah;
+                        badge.style.display = "inline";
+                    } else {
+                        badge.style.display = "none";
+                    }
+                });
+        }
+        
+        setInterval(cekNotifikasi, 5000); // Cek setiap 5 detik
+        window.onload = cekNotifikasi;
     </script>
 </body>
 </html>
+

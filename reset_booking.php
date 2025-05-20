@@ -53,7 +53,7 @@ if (date('w') == 6 && date('H') == 0) {
 
 // Opsi manual override untuk testing
 if (isset($_GET['forcereset'])) {
-    $needsReset = false;
+    $needsReset = true;
 }
 
 // Eksekusi reset jika diperlukan
